@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  joomla:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: joomla-custom:5.2
+    container_name: joomla_app
+    ports:
+      - "8080:80"
+    environment:
+      JOOMLA_DB_HOST: db
+      JOOMLA_DB_USER: joomla_user
+      JOOMLA_DB_PASSWORD: root  
+      JOOMLA_DB_NAME: joomla_db
+    depends_on:
+      - db
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - joomla_network
+
+  db:
+    image: mysql:8.0
+    container_name: joomla_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: joomla_db
+      MYSQL_USER: joomla_user
+      MYSQL_PASSWORD: root
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - joomla_network
+    ports:
+      - "3306:3306"
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
+    networks:
+      - joomla_network
+
+volumes:
+  joomla_data:
+  db_data:
+
+networks:
+  joomla_network:
